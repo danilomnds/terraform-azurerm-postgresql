@@ -79,7 +79,6 @@ resource "azurerm_postgresql_flexible_server_database" "postgresql_flexible_db" 
   depends_on          = [azurerm_postgresql_flexible_server.postgresql_flexible_server]
   for_each            = var.databases != null ? { for k, v in var.databases : k => v if v != null } : {}
   name                = each.value.name
-  resource_group_name = var.resource_group_name
   server_id           = azurerm_postgresql_flexible_server.postgresql_flexible_server.id
   charset             = each.value.charset
   collation           = each.value.collation
@@ -89,7 +88,6 @@ resource "azurerm_postgresql_flexible_server_configuration" "postgresql_configur
   depends_on          = [azurerm_postgresql_flexible_server.postgresql_flexible_server]
   for_each            = var.postgresql_configuration != null ? { for k, v in var.postgresql_configuration : k => v if v != null } : {}
   name                = each.value.name
-  resource_group_name = var.resource_group_name
   server_id           = azurerm_postgresql_flexible_server.postgresql_flexible_server.id
   value               = each.value.value
 }
