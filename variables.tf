@@ -28,6 +28,7 @@ variable "authentication" {
     password_auth_enabled         = optional(bool)
     tenant_id                     = optional(string)
   })
+  default = null
 }
 
 variable "backup_retention_days" {
@@ -105,7 +106,7 @@ variable "replication_role" {
 }
 
 variable "sku_name" {
-  type        = string
+  type = string
 }
 
 variable "source_server_id" {

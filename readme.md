@@ -9,13 +9,11 @@ Module developed to standardize the creation of PostgreSQL Flexible Server.
 
 | Module Version | Terraform Version | AzureRM Version |
 |----------------|-------------------| --------------- |
-| v1.0.0         | v1.6.1            | 3.75.0          |
+| v1.0.0         | v1.6.4            | 3.82.0          |
 
 ## Specifying a version
 
-To avoid that your code get updates automatically, is mandatory to set the version using the `source` option. 
-By defining the `?ref=***` in the the URL, you can define the version of the module.
-
+To avoid that your code get the latest module version, you can define the `?ref=***` in the the URL to point to a specific version.
 Note: The `?ref=***` refers a tag on the git module repo.
 
 ## Use case
@@ -35,11 +33,8 @@ module "postgresql-flex-<system>-<env>" {
     mode = <SameZone|ZoneRedundant>
     standby_availability_zone = <ex: 2>
   }  
-  storage = {
-    size_gb           = <ex: 200>
-    iops              = <ex: 900>
-    auto_grow_enabled = <ex: true>
-  }
+  auto_grow_enabled = false
+  storage_mb = <32768>
   tags = {
     key1 = value1
     key2 = value2
@@ -47,14 +42,14 @@ module "postgresql-flex-<system>-<env>" {
   databases = [
     {
      name = "db01"
-     charset = "utf8mb3"
-     collation = "utf8mb3_general_ci"
+     charset = "utf8"
+     collation = "en_US.utf8"
     },
     {
      name = "db02"
-     charset = "utf8mb3"
-     collation = "utf8mb3_general_ci"
-    },
+     charset = "utf8"
+     collation = "en_US.utf8"
+    }
   ]
   postgresql_configuration = [
     { 
