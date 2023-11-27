@@ -13,7 +13,7 @@ Module developed to standardize the creation of PostgreSQL Flexible Server.
 
 ## Specifying a version
 
-To avoid that your code get the latest module version, you can define the `?ref=***` in the the URL to point to a specific version.
+To avoid that your code get the latest module version, you can define the `?ref=***` in the URL to point to a specific version.
 Note: The `?ref=***` refers a tag on the git module repo.
 
 ## Use case
