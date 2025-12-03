@@ -9,12 +9,14 @@ resource "random_password" "password" {
 }
 
 resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
-  depends_on             = [random_password.password]
-  name                   = var.name
-  resource_group_name    = var.resource_group_name
-  location               = var.location
-  administrator_login    = var.administrator_login
-  administrator_password = var.administrator_password == null ? random_password.password.result : var.administrator_password
+  depends_on                        = [random_password.password]
+  name                              = var.name
+  resource_group_name               = var.resource_group_name
+  location                          = var.location
+  administrator_login               = var.administrator_login
+  administrator_password            = var.administrator_password == null ? random_password.password.result : var.administrator_password
+  administrator_password_wo         = var.administrator_password_wo
+  administrator_password_wo_version = var.administrator_password_wo_version
   dynamic "authentication" {
     for_each = var.authentication != null ? [var.authentication] : []
     content {
@@ -33,10 +35,11 @@ resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
       geo_backup_user_assigned_identity_id = lookup(customer_managed_key.value, "geo_backup_user_assigned_identity_id", null)
     }
   }
-  geo_redundant_backup_enabled = var.geo_redundant_backup_enabled
-  create_mode                  = var.create_mode
-  delegated_subnet_id          = var.delegated_subnet_id
-  private_dns_zone_id          = var.private_dns_zone_id
+  geo_redundant_backup_enabled  = var.geo_redundant_backup_enabled
+  create_mode                   = var.create_mode
+  delegated_subnet_id           = var.delegated_subnet_id
+  private_dns_zone_id           = var.private_dns_zone_id
+  public_network_access_enabled = var.public_network_access_enabled
   dynamic "high_availability" {
     for_each = var.high_availability != null ? [var.high_availability] : []
     content {
@@ -65,6 +68,7 @@ resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
   source_server_id                  = var.source_server_id
   auto_grow_enabled                 = var.auto_grow_enabled
   storage_mb                        = var.storage_mb
+  storage_tier                      = var.storage_tier
   tags                              = local.tags
   version                           = var.postgresql_version
   zone                              = var.zone

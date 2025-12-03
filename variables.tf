@@ -22,6 +22,18 @@ variable "administrator_password" {
   default     = null
 }
 
+variable "administrator_password_wo" {
+  type        = string
+  description = "The Password associated with the administrator_login for the PostgreSQL Flexible Server"
+  default     = null
+}
+
+variable "administrator_password_wo_version" {
+  type        = string
+  description = "An integer value used to trigger an update for administrator_password_wo"
+  default     = null
+}
+
 variable "authentication" {
   type = object({
     active_directory_auth_enabled = optional(bool)
@@ -67,6 +79,11 @@ variable "private_dns_zone_id" {
   description = "ID of the private DNS zone to create the PostgreSQL Flexible Server"
   type        = string
   default     = null
+}
+
+variable "public_network_access_enabled" {
+  type    = bool
+  default = false
 }
 
 variable "high_availability" {
@@ -123,6 +140,18 @@ variable "storage_mb" {
   type = number
 }
 
+# new
+variable "storage_tier" {
+  type    = string
+  default = null
+}
+
+variable "tags" {
+  description = "A map of tags to set on every taggable resources. Empty by default."
+  type        = map(string)
+  default     = {}
+}
+
 variable "postgresql_version" {
   description = "Version of postgresql flexible server"
   type        = string
@@ -132,12 +161,6 @@ variable "zone" {
   description = "Specify availability-zone for mysql Flexible main Server."
   type        = number
   default     = null
-}
-
-variable "tags" {
-  description = "A map of tags to set on every taggable resources. Empty by default."
-  type        = map(string)
-  default     = {}
 }
 
 variable "databases" {
