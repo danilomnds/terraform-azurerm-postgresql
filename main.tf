@@ -1,20 +1,9 @@
-resource "random_password" "password" {
-  length           = 16
-  special          = true
-  min_special      = 2
-  min_numeric      = 2
-  min_upper        = 2
-  min_lower        = 2
-  override_special = "#"
-}
-
 resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
-  depends_on                        = [random_password.password]
   name                              = var.name
   resource_group_name               = var.resource_group_name
   location                          = var.location
   administrator_login               = var.administrator_login
-  administrator_password            = var.administrator_password == null ? random_password.password.result : var.administrator_password
+  administrator_password            = var.administrator_password
   administrator_password_wo         = var.administrator_password_wo
   administrator_password_wo_version = var.administrator_password_wo_version
   dynamic "authentication" {
@@ -26,10 +15,17 @@ resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
     }
   }
   backup_retention_days = var.backup_retention_days
+  dynamic "cluster" {
+    for_each = var.cluster != null ? [var.cluster] : []
+    content {
+      size                  = cluster.value.size
+      default_database_name = cluster.value.default_database_name
+    }
+  }
   dynamic "customer_managed_key" {
     for_each = var.customer_managed_key != null ? [var.customer_managed_key] : []
     content {
-      key_vault_key_id                     = lookup(customer_managed_key.value, "key_vault_key_id", null)
+      key_vault_key_id                     = customer_managed_key.value.key_vault_key_id
       primary_user_assigned_identity_id    = lookup(customer_managed_key.value, "primary_user_assigned_identity_id", null)
       geo_backup_key_vault_key_id          = lookup(customer_managed_key.value, "geo_backup_key_vault_key_id", null)
       geo_backup_user_assigned_identity_id = lookup(customer_managed_key.value, "geo_backup_user_assigned_identity_id", null)
@@ -68,10 +64,22 @@ resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
   source_server_id                  = var.source_server_id
   auto_grow_enabled                 = var.auto_grow_enabled
   storage_mb                        = var.storage_mb
+  storage_type                      = var.storage_type
+  storage_iops                      = var.storage_iops
+  storage_throughput                = var.storage_throughput
   storage_tier                      = var.storage_tier
   tags                              = local.tags
   version                           = var.postgresql_version
   zone                              = var.zone
+  dynamic "timeouts" {
+    for_each = var.timeouts != null ? [var.timeouts] : []
+    content {
+      create = timeouts.value.create
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
   lifecycle {
     ignore_changes = [
       tags["create_date"], zone, high_availability.0.standby_availability_zone
@@ -86,6 +94,14 @@ resource "azurerm_postgresql_flexible_server_database" "postgresql_flexible_db" 
   server_id  = azurerm_postgresql_flexible_server.postgresql_flexible_server.id
   charset    = each.value.charset
   collation  = each.value.collation
+  dynamic "timeouts" {
+    for_each = each.value.timeouts != null ? [each.value.timeouts] : []
+    content {
+      create = timeouts.value.create
+      read   = timeouts.value.read
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "postgresql_configuration" {
@@ -94,6 +110,15 @@ resource "azurerm_postgresql_flexible_server_configuration" "postgresql_configur
   name       = each.value.name
   server_id  = azurerm_postgresql_flexible_server.postgresql_flexible_server.id
   value      = each.value.value
+  dynamic "timeouts" {
+    for_each = each.value.timeouts != null ? [each.value.timeouts] : []
+    content {
+      create = timeouts.value.create
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
+  }
 }
 
 resource "azurerm_role_assignment" "postgresql_reader" {

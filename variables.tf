@@ -20,16 +20,18 @@ variable "administrator_password" {
   description = "postgresql administrator password"
   type        = string
   default     = null
+  sensitive   = true
 }
 
 variable "administrator_password_wo" {
   type        = string
   description = "The Password associated with the administrator_login for the PostgreSQL Flexible Server"
   default     = null
+  sensitive   = true
 }
 
 variable "administrator_password_wo_version" {
-  type        = string
+  type        = number
   description = "An integer value used to trigger an update for administrator_password_wo"
   default     = null
 }
@@ -51,7 +53,7 @@ variable "backup_retention_days" {
 
 variable "customer_managed_key" {
   type = object({
-    key_vault_key_id                     = optional(string)
+    key_vault_key_id                     = string
     primary_user_assigned_identity_id    = optional(string)
     geo_backup_key_vault_key_id          = optional(string)
     geo_backup_user_assigned_identity_id = optional(string)
@@ -89,7 +91,7 @@ variable "public_network_access_enabled" {
 variable "high_availability" {
   type = object({
     mode                      = string
-    standby_availability_zone = number
+    standby_availability_zone = optional(string)
   })
   default = null
 }
@@ -123,7 +125,8 @@ variable "replication_role" {
 }
 
 variable "sku_name" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "source_server_id" {
@@ -137,13 +140,40 @@ variable "auto_grow_enabled" {
 }
 
 variable "storage_mb" {
-  type = number
+  type    = number
+  default = null
 }
 
-# new
 variable "storage_tier" {
   type    = string
   default = null
+}
+
+variable "cluster" {
+  description = "Cluster configuration for PostgreSQL versions 17 and later."
+  type = object({
+    size                  = number
+    default_database_name = optional(string)
+  })
+  default = null
+}
+
+variable "storage_type" {
+  description = "Storage type. Supported values are Premium_LRS and PremiumV2_LRS."
+  type        = string
+  default     = "Premium_LRS"
+}
+
+variable "storage_iops" {
+  description = "Maximum storage IOPS. Required with PremiumV2_LRS storage."
+  type        = number
+  default     = null
+}
+
+variable "storage_throughput" {
+  description = "Maximum storage throughput in MB/s. Required with PremiumV2_LRS storage."
+  type        = number
+  default     = null
 }
 
 variable "tags" {
@@ -155,19 +185,36 @@ variable "tags" {
 variable "postgresql_version" {
   description = "Version of postgresql flexible server"
   type        = string
+  default     = null
 }
 
 variable "zone" {
-  description = "Specify availability-zone for mysql Flexible main Server."
-  type        = number
+  description = "Availability zone for the PostgreSQL Flexible Server."
+  type        = string
   default     = null
+}
+
+variable "timeouts" {
+  description = "Timeouts for PostgreSQL Flexible Server operations."
+  type = object({
+    create = optional(string)
+    read   = optional(string)
+    update = optional(string)
+    delete = optional(string)
+  })
+  default = null
 }
 
 variable "databases" {
   type = list(object({
     name      = string
-    charset   = string
-    collation = string
+    charset   = optional(string, "UTF8")
+    collation = optional(string, "en_US.utf8")
+    timeouts = optional(object({
+      create = optional(string)
+      read   = optional(string)
+      delete = optional(string)
+    }))
   }))
   default = null
 }
@@ -187,6 +234,12 @@ variable "postgresql_configuration" {
   type = list(object({
     name  = string
     value = string
+    timeouts = optional(object({
+      create = optional(string)
+      read   = optional(string)
+      update = optional(string)
+      delete = optional(string)
+    }))
   }))
   default = null
 }
